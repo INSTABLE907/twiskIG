@@ -1,0 +1,256 @@
+@startuml
+skinparam class {
+   BackgroundColor<<java>> Wheat
+   BorderColor<<java>> Tomato
+}
+
+hide stereotype
+
+package twisk{
+package Exceptions {
+class Exception<<java>>
+class TwiskException extends Exception{
+    Alert alertBoucle;
+    Alert alertEtape;
+    Alert alertTemps;
+TwiskException(String s)
+void afficherAlerteBoucle()
+void afficherMemeEtape()
+void afficherCheminDejaExistant()
+void afficherDelaiIncorrect()
+void afficherEcartTempsIncorrect()
+
+} 
+}
+
+      package outils {
+        class FabriqueIdentifiant {
+          int noEtape
+          static FabriqueIdentifiant getInstance()
+          String getIdentifiantEtape() 
+        }
+
+        FabriqueIdentifiant -- "1" FabriqueIdentifiant : static
+      }
+
+     
+
+     package vues {
+        interface EventHandler <<java>>
+
+        interface Observateur {
+          void reagir()
+        }
+
+        class TailleComposant{
+        int largeur
+        int hauteur
+        int btntaille
+        static TailleComposant getInstance()
+        }
+        class VBox<<java>>
+        class HBox<<java>>
+class Group<<java>>
+        class EcouteurBouton{
+void handle(ActionEvent a)
+}
+        class EcouteurItemSupp {
+void handle(ActionEvent a)
+}
+        class EcouteurItemRenommer{
+void handle(ActionEvent a)
+}
+        class EcouteurItemRmSelection {
+void handle(ActionEvent a)
+}
+        class EcouteurItemDelai {
+void handle(ActionEvent a)
+}
+        class EcouteurItemEcartTemps{
+void handle(ActionEvent a)
+}
+        class EcouteurItemEntree {
+void handle(ActionEvent a)
+}
+        class EcouteurItemSortie{
+void handle(ActionEvent a)
+}
+class EcouteurVueActiviteIG{
+void handle(MouseEvent e)
+}
+class EcouteurVuePtDeControle{
+void handle(MouseEvent e)
+}
+class EcouteurVueArcIG{
+void handle(MouseEvent e)
+}
+        class Button<<java>>
+        class TilePane<<java>>
+class Circle<<java>>
+        class Pane<<java>>
+        class Label<<java>>
+class Menu<<java>>
+class MenuItem<<java>>
+class MenuBar<<java>>
+
+        abstract VueEtapeIG extends VBox implements Observateur{
+          VueEtapeIG(MondeIG monde, EtapeIG etape)
+        }
+
+        class VueActiviteIG extends VueEtapeIG {
+          VueActiviteIG(MondeIG monde, EtapeIG etape)
+          void reagir()
+        }
+
+        class VueMondeIG implements Observateur {
+          VueMondeIG(MondeIG monde)
+          void reagir()
+        }
+
+        class VueOutils implements Observateur {
+          VueOutils(MondeIG monde)
+          void reagir()
+        }
+class VuePointDeControleIG extends Circle {
+
+VuePointDeControleIG(Monde IG m,PointDeControleIG p)
+void reagir()
+}
+
+class VueArcIG extends Group implements Observateur{
+Line line
+Polyline polyline
+Polyline creerFleche(double x1, double y1, double x2, double y2)
+void miseAjourPosition()
+void reagir()
+int x1()
+int x2()
+int y1()
+int y2()
+}
+
+class VueMenu extends MenuBar implements Observateur{
+VueMenu(MondeIG monde)
+void creationMenu()
+void creationMenuItem()
+void reagir()
+}
+     }
+
+
+
+     package mondeIG {
+class ArcIG{
+boolean estSelect
+ArcIG(PointDeControleIG p1, PointDeControleIG p2)
+}
+
+       class PointDeControleIG{
+       String idpdc
+int posCentreX
+int posCentreY
+PointDeControleIG(int x,int y,String id,EtapeIG etapeRat)
+       }
+       class SujetObserve {
+         void ajouterObservateur(Observateur v)
+         void notifierObservateurs()
+       }
+
+       class MondeIG extends SujetObserve implements Iterable{
+         MondeIG()
+         void ajouter(String type)
+boolean memeEtape()
+int nbEtapeSelectionne()
+void supprimerEtape()
+void supprimerArc()
+void effacerSelection()
+void renommerEtape(String s)
+ void defUneEntree()
+void defUneSortie()
+void setDelai(int k) throws TwiskException
+int getDelai()
+void setEcartTemps(int k) throws TwiskException
+void dragAndDNouveauEmplacement(int x, int y, String id)
+void ajouter(PointDeControleIG pt1, PointDeControleIG pt2) throws TwiskException
+ 
+       }
+
+       abstract class EtapeIG implements Iterable<PointDeControleIG>{
+         String nom
+         String identifiant
+         int posX
+         int posY
+         int largeur
+         int hauteur
+         EtapeIG(String nom, int larg, int haut)
+         int aleatoirePosX()
+int aleatoirePosY()
+void initialisationPdc()
+void miseAJourPdc()
+void setXY(int x, int y)
+       }
+
+       class ActiviteIG {
+         ActiviteIG(String nom, int larg, int haut)
+       }
+
+       interface Iterable<EtapeIG,PointDeControleIG><<java>>{
+         Iterator<EtapeIG> iterator()
+Iterator<PointDeControleIG> iterator()
+       }
+     }
+
+VueEtapeIG - "1" EtapeIG
+VueEtapeIG --"1" Label
+VueActiviteIG --"1" HBox
+VueMondeIG --|> Pane
+VueOutils --|> TilePane
+VueOutils -- "*" Button
+VuePointDeControleIG --"1" MondeIG
+VuePointDeControleIG --"1" PointDeControleIG
+VueArcIG --"1" ArcIG
+VueArcIG --"1" MondeIG
+VueMenu --"1" MondeIG
+VueMenu --"*" Menu
+VueMenu --"*" MenuItem
+
+Button -down- "*" EventHandler : "       "
+
+EcouteurBouton ..|> EventHandler : "ActionEvent"
+EcouteurBouton --"1" MondeIG
+EcouteurVuePtDeControle ..|> EventHandler : "MouseEvent"
+EcouteurVuePtDeControle -- "1" MondeIG
+EcouteurVueArcIG --"1" MondeIG
+EcouteurVueArcIG --"1" ArcIG
+EcouteurVueArcIG ..|> EventHandler : "MouseEvent"
+EcouteurItemSupp -- "1" MondeIG
+EcouteurItemSupp ..|> EventHandler : "ActionEvent"
+EcouteurItemRenommer  -- "1" MondeIG
+EcouteurItemRenommer ..|> EventHandler : "ActionEvent"
+EcouteurItemRmSelection  -- "1" MondeIG
+EcouteurItemRmSelection ..|> EventHandler : "ActionEvent"
+EcouteurItemDelai  -- "1" MondeIG
+EcouteurItemDelai ..|> EventHandler : "ActionEvent"
+EcouteurItemEcartTemps -- "1" MondeIG
+EcouteurItemEcartTemps ..|> EventHandler : "ActionEvent"
+EcouteurItemEntree  -- "1" MondeIG
+EcouteurItemEntree ..|> EventHandler : "ActionEvent"
+EcouteurItemSortie -- "1" MondeIG
+EcouteurItemSortie ..|> EventHandler : "ActionEvent"
+EcouteurVueActiviteIG --"1" MondeIG
+EcouteurVueActiviteIG --"1" EtapeIG
+EcouteurItemSortie ..|> EventHandler : "MouseEvent"
+
+
+
+
+SujetObserve "1"-right "*" Observateur
+
+MondeIG --"*" EtapeIG
+EtapeIG <|-down- ActiviteIG
+EtapeIG --"*" PointDeControleIG
+PointDeControleIG --"1" EtapeIG
+ArcIG --"2" PointDeControleIG
+
+}
+@enduml
